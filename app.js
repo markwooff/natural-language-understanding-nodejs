@@ -34,17 +34,13 @@ app.get('/', function(req, res) {
 });
 
 app.post('/api/analyze', function(req, res, next) {
-  if (process.env.SHOW_DUMMY_DATA) {
-    res.json(require('./payload.json'));
-  } else {
-    nlu.analyze(req.body, (err, results) => {
-      if (err) {
-        return next(err);
-      } else {
-        res.json({ query: req.body.query, results });
-      }
-    });
-  }
+  nlu.analyze(req.body, (err, results) => {
+    if (err) {
+      return next(err);
+    } else {
+      res.json({ query: req.body.query, results });
+    }
+  });
 });
 
 // error-handler settings

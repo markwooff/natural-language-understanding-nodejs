@@ -1,14 +1,14 @@
 ---
 declared-services:
-  my-nlu-service:
+  tbs-ciob-nlu-service:
     label: natural-language-understanding
     plan: free
 
 applications:
-- name: natural-language-understanding-demo
+- name: tbs-ciob-app
   path: .
   buildpack: sdk-for-nodejs
   command: npm start
   memory: 512M
   services:
-  - my-nlu-service
+  - tbs-ciob-nlu-service

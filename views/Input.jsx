@@ -9,6 +9,9 @@ import { weight, size } from './utils/typography';
 import { breakpoint } from './utils/breakpoints';
 import { MAX_CONTENT_WIDTH } from './utils/variables';
 
+var Airtable = require('airtable');
+var base = new Airtable({apiKey: 'keycUtwpJ3s8KeCOL'}).base('app4Ch9LBjHabwPrl');
+
 let languages = lang();
 let index = 0;
 let currentInput;
@@ -106,11 +109,38 @@ const Input = React.createClass({
     return {
       text: this.props.text,
       url: this.props.url,
+      rowcontent: this.props.rowcontent
     };
   },
 
+  componentDidMount() {
+    var parent = this;
+    var content = "";
+
+    base('Imported table').select({
+        // Selecting the first 3 records in Grid view:
+        maxRecords: 5,
+        view: "Grid view"
+    }).eachPage(function page(records, fetchNextPage) {
+        // This function (`page`) will get called for each page of records.
+        records.forEach(function(record) {
+            content += record.get('summary_en') + "\n---\n";
+        });
+        
+        parent.setState({ rowcontent: content });
+        
+        // To fetch the next page of records, call `fetchNextPage`.
+        // If there are more records, `page` will get called again.
+        // If there are no more records, `done` will get called.
+        fetchNextPage();
+
+    }, function done(err) {
+        if (err) { console.error(err); return; }
+    });
+  },
+
   onAnalyzeClick() {
-    currentInput = index === 0 ? this.state.text : this.state.url;
+    currentInput = index === 0 ? this.state.text : (index === 1 ? this.state.url : this.state.rowcontent);
     this.props.onSubmit(currentInput);
   },
   
@@ -133,6 +163,13 @@ const Input = React.createClass({
           <Pane label="URL">
             <textarea className={css(styles.textarea)} defaultValue={this.state.url} onChange={(e) => {
               this.setState({ url: e.target.value });
+              this.props.onInputChange.call(this,e);
+            }} />
+          </Pane>
+          <Pane label="Airtable">
+            <div style={{visibility:'hidden', margin: '0rem 0rem -1rem', height: '0rem', overflow: 'hidden'}}></div>
+            <textarea className={css(styles.textarea)} defaultValue={this.state.rowcontent} rows="7" onChange={(e) => {
+              this.setState({ rowcontent: e.target.value });
               this.props.onInputChange.call(this,e);
             }} />
           </Pane>
